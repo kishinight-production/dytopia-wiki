@@ -79,7 +79,7 @@ function ajouter_input(terminal) {
 
 /* === Connexion === */
 async function charger_utilisateurs() {
-    const response = await fetch("connexion.json");
+    const response = await fetch("assets/connexion.json");
     const liste = await response.json();
     return liste;
 }
