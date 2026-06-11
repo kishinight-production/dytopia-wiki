@@ -1,0 +1,57 @@
+/* === Variables === */
+:root {
+    --fond-principal: black;
+    --fond-secondaire: #222222;
+    --erreur: #AA0000;
+    --correct: #00AA00;
+    --bordure: white;
+    --texte: white;
+}
+
+/* === Balises générales === */
+body {
+    font-family: 'Courier New', Courier, monospace;
+    color: var(--texte);
+    background-color: var(--fond-principal);
+    margin: 0;
+    font-size: 1rem;
+}
+
+header {
+    background-color: var(--fond-secondaire);
+    padding: 0.25%;
+    border: 0.05rem solid var(--bordure);
+    margin-bottom: 0.5%
+}
+
+main {
+    margin-left: 0.5%;
+}
+
+/* === Autres balises === */
+input {
+    outline: none;
+    background-color: transparent;
+    border: none;
+    color: var(--texte);
+    font-family: 'Courier New', Courier, monospace;
+    width: 60%;
+    caret-shape: underscore;
+    caret-color: var(--texte);
+    font-size: 1rem;
+}
+
+p {
+    margin: 0;
+}
+
+/* === Classes === */
+.erreur {
+    color: var(--erreur);
+    font-style: italic;
+}
+
+.correct {
+    color: var(--correct);
+    font-style: italic;
+}
