@@ -1,162 +1,31 @@
-/* === Initialisation === */
-const id = localStorage.getItem("id_connecte");
-const tags = JSON.parse(localStorage.getItem("tag_connecte")) || [];
-
-if (!id) {
-    window.location.href = "../../index.html";
-}
-
-const a_perm_plus = tags.includes("perm+");
-
 /* === Horloge === */
-function maj_horloge() {
-    document.getElementById("clock").textContent = new Date().toLocaleTimeString();
-}
-maj_horloge();
-setInterval(maj_horloge, 1000);
+function horloge() {
+    const date = new Date().toLocaleTimeString()
 
-/* === Chargement du JSON === */
-async function charger_index() {
-    const response = await fetch("../../explorateur-nexuria/index.json");
-    const liste = await response.json();
-    return liste;
+    document.getElementById("clock").innerHTML = date
 }
 
-/* === Lecture du YAML dans un .md === */
-async function lire_yaml(chemin) {
-    const url = `https://raw.githubusercontent.com/kishinight-production/explorateur-nexuria/main/${chemin}`;
-    const response = await fetch(url);
-    const texte = await response.text();
+/* === Fonction === */
+/* Autres */
+function identifiant(id) {
+    const div = document.getElementById("id")
 
-    // Vérifie si le fichier commence par ---
-    if (!texte.startsWith("---")) return { titre: chemin, tag: null };
-
-    const fin = texte.indexOf("---", 3);
-    if (fin === -1) return { titre: chemin, tag: null };
-
-    const yaml = texte.substring(3, fin).trim();
-    const meta = { titre: chemin, tag: null };
-
-    yaml.split("\n").forEach(ligne => {
-        const [cle, ...valeur] = ligne.split(":");
-        const val = valeur.join(":").trim().replace(/^"|"$/g, "");
-        if (cle.trim() === "titre") meta.titre = val;
-        if (cle.trim() === "tag") meta.tag = val || null;
-    });
-
-    return meta;
+    div.innerHTML = `Bonjour "<u>${id}</u>"`
+    div.style.border = "0.05rem solid white"
 }
 
-/* === Vérification de l'accès === */
-function peut_voir(tag_fichier) {
-    if (a_perm_plus) return true;           // perm+ voit tout
-    if (!tag_fichier) return true;          // pas de tag = visible par tous
-    return tags.includes(tag_fichier);      // sinon vérifie le tag
-}
-
-/* === Construction de l'arbre === */
-function construire_arbre(liste) {
-    const arbre = {};
-
-    liste.forEach(chemin => {
-        const parties = chemin.split("/");
-        let noeud = arbre;
-
-        parties.forEach((partie, index) => {
-            if (index === parties.length - 1) {
-                if (!noeud["__fichiers__"]) noeud["__fichiers__"] = [];
-                noeud["__fichiers__"].push({ nom: partie, chemin: chemin });
-            } else {
-                if (!noeud[partie]) noeud[partie] = {};
-                noeud = noeud[partie];
-            }
-        });
-    });
-
-    return arbre;
-}
-
-/* === Vérifie si un dossier a au moins un fichier accessible === */
-async function dossier_accessible(noeud) {
-    // Vérifie les fichiers directs
-    if (noeud["__fichiers__"]) {
-        for (const fichier of noeud["__fichiers__"]) {
-            const meta = await lire_yaml(fichier.chemin);
-            if (peut_voir(meta.tag)) return true;
-        }
+function element(n) {
+    const div = document.getElementById("element")
+    if (n === "") {
+        div.textContent = `0 element`
+        return
     }
-
-    // Vérifie récursivement les sous-dossiers
-    for (const cle of Object.keys(noeud)) {
-        if (cle === "__fichiers__") continue;
-        if (await dossier_accessible(noeud[cle])) return true;
-    }
-
-    return false;
+    div.textContent = `${n} element(s)`
+    return
 }
 
-/* === Affichage de l'explorateur === */
-async function afficher_dossier(noeud, base) {
-    base.innerHTML = "";
-    let nb_elements = 0;
-
-    // Dossiers
-    for (const cle of Object.keys(noeud)) {
-        if (cle === "__fichiers__") continue;
-
-        const accessible = await dossier_accessible(noeud[cle]);
-        if (!accessible) continue;
-
-        nb_elements++;
-        const div = document.createElement("div");
-        div.className = "dossier";
-        div.textContent = `📁 ${cle}`;
-        div.addEventListener("click", function() {
-            afficher_dossier(noeud[cle], base);
-        });
-        base.appendChild(div);
-    }
-
-    // Fichiers
-    if (noeud["__fichiers__"]) {
-        for (const fichier of noeud["__fichiers__"]) {
-            const meta = await lire_yaml(fichier.chemin);
-            if (!peut_voir(meta.tag)) continue;
-
-            nb_elements++;
-            const div = document.createElement("div");
-            div.className = "fichier";
-            div.textContent = `📄 ${meta.titre}`;
-            div.addEventListener("click", function() {
-                afficher_fichier(fichier.chemin);
-            });
-            base.appendChild(div);
-        }
-    }
-
-    document.getElementById("element").textContent = `${nb_elements} élément(s)`;
-}
-
-/* === Affichage d'un fichier .md === */
-async function afficher_fichier(chemin) {
-    const url = `https://raw.githubusercontent.com/kishinight-production/explorateur-nexuria/main/${chemin}`;
-    const response = await fetch(url);
-    const texte = await response.text();
-
-    // Supprime le YAML avant d'afficher
-    let contenu = texte;
-    if (texte.startsWith("---")) {
-        const fin = texte.indexOf("---", 3);
-        if (fin !== -1) contenu = texte.substring(fin + 3).trim();
-    }
-
-    const panneau = document.getElementById("panneau");
-    panneau.innerHTML = md_vers_html(contenu);
-    panneau.style.display = "block";
-}
-
-/* === Convertisseur Markdown → HTML === */
-function md_vers_html(texte) {
+/* Document */
+function convertion_MD_in_HTML(texte) {
     return texte
         // Titres
         .replace(/^### (.+)$/gm, "<h3>$1</h3>")
@@ -197,15 +66,218 @@ function md_vers_html(texte) {
         .replace(/^> (.+)$/gm, "<blockquote>$1</blockquote>")
 
         // Retour à la ligne
-        .replace(/\n/g, "<br>");
+        .replace(/\n/g, "<br>")
+}
+
+function afficher_texte(texte) {
+    const explorateur = document.getElementById("base")
+    const afficheur = document.getElementById("page-document")
+
+    explorateur.style.display = "none"
+    afficheur.innerHTML = texte
+    afficheur.style.display = "block"
+}
+
+function cacher_texte(texte) {
+    const explorateur = document.getElementById("base")
+    const afficheur = document.getElementById("page-document")
+
+    afficheur.style.display = "none"
+    explorateur.style.display = "block"
+}
+
+async function charger_fichier(chemin) {
+    const url = `https://raw.githubusercontent.com/kishinight-production/explorateur-nexuria/main/${chemin}`
+    const reponse = await fetch(url)
+    const texte = await reponse.text()
+
+    /* === Lecture du YAML === */
+    let meta = { titre: chemin, tag: null }
+    let contenu = texte
+
+    if (texte.startsWith("---")) {
+        const fin = texte.indexOf("---", 3)
+        if (fin !== -1) {
+            const yaml = texte.substring(3, fin).trim()
+            yaml.split("\n").forEach(ligne => {
+                const [cle, ...valeur] = ligne.split(":")
+                const val = valeur.join(":").trim().replace(/^"|"$/g, "")
+                if (cle.trim() === "titre") meta.titre = val
+                if (cle.trim() === "tag") meta.tag = val || null
+            })
+            contenu = texte.substring(fin + 3).trim()
+        }
+    }
+
+    /* === Vérification accès === */
+    const tags = JSON.parse(localStorage.getItem("tag_connecte")) || []
+    const a_perm_plus = tags.includes("perm+")
+
+    const peut_voir = a_perm_plus || !meta.tag || tags.includes(meta.tag)
+
+    if (!peut_voir) {
+        afficher_texte("<p class='erreur'>Accès refusé.</p>")
+        return
+    }
+
+    /* === Affichage === */
+    afficher_texte(convertion_MD_in_HTML(contenu))
+}
+
+function click_attente_retour() {
+    return new Promise(function(resolve) {
+        const retour = document.getElementById("retour")
+        retour.addEventListener("click", function() {
+            resolve()
+        })
+    })
+}
+
+/* Explorateur de fichier */
+function click_attente() {
+    return new Promise(function(resolve) {
+        // Sélectionne tous les fichiers et dossiers
+        const fichiers = document.querySelectorAll(".fichier")
+        const dossiers = document.querySelectorAll(".dossier")
+
+        fichiers.forEach(fichier => {
+            fichier.addEventListener("click", function() {
+                resolve({ type: "fichier", nom: fichier.dataset.nom })
+            })
+        })
+
+        dossiers.forEach(dossier => {
+            dossier.addEventListener("click", function() {
+                resolve({ type: "dossier", nom: dossier.dataset.nom })
+            })
+        })
+    })
+}
+
+function construire_arbre(liste, emplacement) {
+    const fichier_renvoyer = []
+    const dossier_renvoyer = []
+
+    if (emplacement === "") {
+        liste.forEach(doc => {
+            if (!doc.includes("/")) {
+                fichier_renvoyer.push(doc)
+            }
+            else {
+                const nom_dossier = doc.split("/")[0]
+                if (!dossier_renvoyer.includes(nom_dossier)) {
+                    dossier_renvoyer.push(nom_dossier)
+                }
+            }
+        })
+    }
+    else {
+        liste.forEach(doc => {
+            if (doc.startsWith(emplacement + "/")) {
+                const suite = doc.replace(emplacement + "/", "")
+
+                if (!suite.includes("/")) {
+                    fichier_renvoyer.push(suite)
+                }
+                else {
+                    const nom_dossier = suite.split("/")[0]
+                    if (!dossier_renvoyer.includes(nom_dossier)) {
+                        dossier_renvoyer.push(nom_dossier)
+                    }
+                }
+            }
+        })
+    }
+
+    return { fichiers: fichier_renvoyer, dossiers: dossier_renvoyer }
+}
+
+function create_document(fichier, dossier) {
+    const emplacement = document.getElementById("base")
+
+    if (fichier !== "") {
+        const p = document.createElement("p")
+        p.textContent = `📄 ${fichier}`
+        p.className = "fichier"
+        p.dataset.nom = fichier
+        emplacement.appendChild(p)
+    }
+
+    if (dossier !== "") {
+        const p = document.createElement("p")
+        p.textContent = `📁 ${dossier}`
+        p.className = "dossier"
+        p.dataset.nom = dossier
+        emplacement.appendChild(p)
+    }
+}
+
+function cacher_document(element) {
+    if (element) {
+        element.remove()
+    }
+}
+
+async function charger_index() {
+    const reponse = await fetch("https://kishinight-production.github.io/explorateur-nexuria/index.json")
+    const index = reponse.json()
+    return index
+}
+
+function click_attente() {
+    return new Promise(function(resolve) {
+        const fichier = document.getElementById("fichier")
+        const dossier = document.getElementById("dossier")
+        fichier.addEventListener("click", function() {
+            resolve(fichier)
+        })
+        dossier.addEventListener("click", function() {
+            resolve(dossier)
+        })
+    })
 }
 
 /* === Lancement === */
-async function lancer() {
-    const base = document.getElementById("base");
-    const liste = await charger_index();
-    const arbre = construire_arbre(liste);
-    await afficher_dossier(arbre, base);
+async function lancer(dossier_emplacement) {
+    /* === Initialisation === */
+    const user = localStorage.getItem("id_connecte")
+    identifiant(user)
+    element("")
+
+    /* === Chargement === */
+    const index = await charger_index()
+    const tag = JSON.parse(localStorage.getItem("tag_connecte")) || []
+
+    /* === Contenu === */
+    const contenu = construire_arbre(index, dossier_emplacement)
+    const fichiers = contenu.fichiers
+    const dossiers = contenu.dossiers
+
+    /* === Affichage === */
+    document.getElementById("base").innerHTML = ""
+    dossiers.forEach(dossier => create_document("", dossier))
+    fichiers.forEach(fichier => create_document(fichier, ""))
+    element(dossiers.length + fichiers.length)
+
+    /* === Attente du clic === */
+    const choix = await click_attente()
+
+    /* === Traitement du clic === */
+    if (choix.type === "dossier") {
+        const nouvel_emplacement = dossier_emplacement === "" ? choix.nom : dossier_emplacement + "/" + choix.nom
+        lancer(nouvel_emplacement)
+    }
+    else if (choix.type === "fichier") {
+        const chemin = dossier_emplacement === "" ? choix.nom : dossier_emplacement + "/" + choix.nom
+        await charger_fichier(chemin)
+        /* Attendre un clic pour revenir à l'explorateur */
+        await click_attente_retour()
+        cacher_texte()
+        lancer(dossier_emplacement)
+    }
 }
 
-lancer();
+/* === Initialisation === */
+setInterval(horloge, 1000)
+let dossier = ""
+lancer(dossier)
