@@ -219,7 +219,7 @@ function cacher_document(element) {
 }
 
 async function charger_index() {
-    const reponse = await fetch("https://kishinight-production.github.io/explorateur-nexuria/index.json")
+    const reponse = await fetch("https://raw.githubusercontent.com/kishinight-production/explorateur-nexuria/main/index.json")
     const index = reponse.json()
     return index
 }
