@@ -15,8 +15,9 @@ header {
     padding-block: 1%;
     padding-inline: 0.75%;
     display: flex;
-    gap: 5%;
+    gap: 45%;
     font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
 }
 
 main {
@@ -44,6 +45,7 @@ footer {
     padding-block: 1%;
     padding-inline: 0.75%;
     display: flex;
-    gap: 10%;
+    gap: 35%;
     font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
 }

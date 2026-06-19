@@ -1,19 +1,20 @@
-/* === Horloge === */
+/* === Autres Fonctions === */
+/* Horloge */
 function horloge() {
     const date = new Date().toLocaleTimeString()
 
     document.getElementById("clock").innerHTML = date
 }
 
-/* === Fonction === */
-/* Autres */
+/* Identifiant connection */
 function identifiant(id) {
     const div = document.getElementById("id")
 
-    div.innerHTML = `Bonjour "<u>${id}</u>"`
-    div.style.border = "0.05rem solid white"
+    div.innerHTML = `Bonjour "${id}"`
+    div.style.border = "0.01rem solid white"
 }
 
+/* élément chargés */
 function element(n) {
     const div = document.getElementById("element")
     if (n === "") {
@@ -24,7 +25,8 @@ function element(n) {
     return
 }
 
-/* Document */
+/* === Fonctions de l'explorateur === */
+/* Utilitaires */
 function convertion_MD_in_HTML(texte) {
     return texte
         // Titres
@@ -69,7 +71,48 @@ function convertion_MD_in_HTML(texte) {
         .replace(/\n/g, "<br>")
 }
 
-function afficher_texte(texte) {
+function extraire_yaml(fichier) {
+    const yaml = {};
+    const resultat = fichier.match(/^---\n([\s\S]*?)\n---/);
+    if (!resultat) {
+        return yaml;
+    }
+    const contenu_yaml = resultat[1];
+    const lignes = contenu_yaml.split("\n");
+
+    lignes.forEach(ligne => {
+        const [cle, valeur] = ligne.split(":");
+        if (cle && valeur) {
+            yaml[cle.trim()] = valeur.trim();
+        }
+    });
+
+    return yaml;
+}
+
+function verifier_fichier(fichier) {
+    const tags_acces =
+        JSON.parse(localStorage.getItem("tag_connecte"));
+
+    const yaml = extraire_yaml(fichier);
+
+    if (!yaml.tag) {
+        return true;
+    }
+
+    return tags_acces.includes(yaml.tag);
+}
+
+/* document */
+function cacher_document(texte) {
+    const explorateur = document.getElementById("base")
+    const afficheur = document.getElementById("page-document")
+
+    afficheur.style.display = "none"
+    explorateur.style.display = "block"
+}
+
+function afficher_document(texte) {
     const explorateur = document.getElementById("base")
     const afficheur = document.getElementById("page-document")
 
@@ -78,121 +121,8 @@ function afficher_texte(texte) {
     afficheur.style.display = "block"
 }
 
-function cacher_texte(texte) {
-    const explorateur = document.getElementById("base")
-    const afficheur = document.getElementById("page-document")
-
-    afficheur.style.display = "none"
-    explorateur.style.display = "block"
-}
-
-async function charger_fichier(chemin) {
-    const url = `https://raw.githubusercontent.com/kishinight-production/explorateur-nexuria/main/${chemin}`
-    const reponse = await fetch(url)
-    const texte = await reponse.text()
-
-    /* === Lecture du YAML === */
-    let meta = { titre: chemin, tag: null }
-    let contenu = texte
-
-    if (texte.startsWith("---")) {
-        const fin = texte.indexOf("---", 3)
-        if (fin !== -1) {
-            const yaml = texte.substring(3, fin).trim()
-            yaml.split("\n").forEach(ligne => {
-                const [cle, ...valeur] = ligne.split(":")
-                const val = valeur.join(":").trim().replace(/^"|"$/g, "")
-                if (cle.trim() === "titre") meta.titre = val
-                if (cle.trim() === "tag") meta.tag = val || null
-            })
-            contenu = texte.substring(fin + 3).trim()
-        }
-    }
-
-    /* === Vérification accès === */
-    const tags = JSON.parse(localStorage.getItem("tag_connecte")) || []
-    const a_perm_plus = tags.includes("perm+")
-
-    const peut_voir = a_perm_plus || !meta.tag || tags.includes(meta.tag)
-
-    if (!peut_voir) {
-        afficher_texte("<p class='erreur'>Accès refusé.</p>")
-        return
-    }
-
-    /* === Affichage === */
-    afficher_texte(convertion_MD_in_HTML(contenu))
-}
-
-function click_attente_retour() {
-    return new Promise(function(resolve) {
-        const retour = document.getElementById("retour")
-        retour.addEventListener("click", function() {
-            resolve()
-        })
-    })
-}
-
-/* Explorateur de fichier */
-function click_attente() {
-    return new Promise(function(resolve) {
-        // Sélectionne tous les fichiers et dossiers
-        const fichiers = document.querySelectorAll(".fichier")
-        const dossiers = document.querySelectorAll(".dossier")
-
-        fichiers.forEach(fichier => {
-            fichier.addEventListener("click", function() {
-                resolve({ type: "fichier", nom: fichier.dataset.nom })
-            })
-        })
-
-        dossiers.forEach(dossier => {
-            dossier.addEventListener("click", function() {
-                resolve({ type: "dossier", nom: dossier.dataset.nom })
-            })
-        })
-    })
-}
-
-function construire_arbre(liste, emplacement) {
-    const fichier_renvoyer = []
-    const dossier_renvoyer = []
-
-    if (emplacement === "") {
-        liste.forEach(doc => {
-            if (!doc.includes("/")) {
-                fichier_renvoyer.push(doc)
-            }
-            else {
-                const nom_dossier = doc.split("/")[0]
-                if (!dossier_renvoyer.includes(nom_dossier)) {
-                    dossier_renvoyer.push(nom_dossier)
-                }
-            }
-        })
-    }
-    else {
-        liste.forEach(doc => {
-            if (doc.startsWith(emplacement + "/")) {
-                const suite = doc.replace(emplacement + "/", "")
-
-                if (!suite.includes("/")) {
-                    fichier_renvoyer.push(suite)
-                }
-                else {
-                    const nom_dossier = suite.split("/")[0]
-                    if (!dossier_renvoyer.includes(nom_dossier)) {
-                        dossier_renvoyer.push(nom_dossier)
-                    }
-                }
-            }
-        })
-    }
-
-    return { fichiers: fichier_renvoyer, dossiers: dossier_renvoyer }
-}
-
-function create_document(fichier, dossier) {
+/* Fichiers */
+function create_fichier(fichier, dossier) {
     const emplacement = document.getElementById("base")
 
     if (fichier !== "") {
@@ -212,72 +142,77 @@ function create_document(fichier, dossier) {
     }
 }
 
-function cacher_document(element) {
+function cacher_fichier(element) {
     if (element) {
         element.remove()
     }
 }
 
-async function charger_index() {
-    const reponse = await fetch("https://raw.githubusercontent.com/kishinight-production/explorateur-nexuria/main/index.json")
-    const index = reponse.json()
-    return index
-}
+function creer_explorateur(dossier, vue_fichier) {
+    const base = document.getElementById("base");
+    base.innerHTML = "";
+    const dossiers_affiches = [];
 
-function click_attente() {
-    return new Promise(function(resolve) {
-        const fichier = document.getElementById("fichier")
-        const dossier = document.getElementById("dossier")
-        fichier.addEventListener("click", function() {
-            resolve(fichier)
-        })
-        dossier.addEventListener("click", function() {
-            resolve(dossier)
-        })
-    })
+    vue_fichier.forEach(chemin => {
+        const relatif = chemin.replace(dossier, "");
+        const morceaux = relatif.split("/");
+        if (morceaux.length > 1) {
+            const nom_dossier = morceaux[0];
+            if (!dossiers_affiches.includes(nom_dossier)) {
+                dossiers_affiches.push(nom_dossier);
+                create_fichier("", nom_dossier);
+            }
+
+        }
+        else {
+            create_fichier(morceaux[0], "");
+        }
+    });
+
+    document.querySelectorAll(".dossier").forEach(element => {
+        element.addEventListener("click", () => {
+            creer_explorateur(
+                `${dossier}${element.dataset.nom}/`,
+                vue_fichier
+            );
+        });
+    });
+
+        document.querySelectorAll(".fichier").forEach(element => {
+        element.addEventListener("click", () => {
+            fetch(element.dataset.chemin)
+                .then(reponse => reponse.text())
+                .then(contenu => {
+                    afficher_document(
+                        convertion_MD_in_HTML(contenu)
+                    );
+                });
+        });
+    });
 }
 
 /* === Lancement === */
-async function lancer(dossier_emplacement) {
-    /* === Initialisation === */
-    const user = localStorage.getItem("id_connecte")
-    identifiant(user)
-    element("")
 
-    /* === Chargement === */
-    const index = await charger_index()
-    const tag = JSON.parse(localStorage.getItem("tag_connecte")) || []
-
-    /* === Contenu === */
-    const contenu = construire_arbre(index, dossier_emplacement)
-    const fichiers = contenu.fichiers
-    const dossiers = contenu.dossiers
-
-    /* === Affichage === */
-    document.getElementById("base").innerHTML = ""
-    dossiers.forEach(dossier => create_document("", dossier))
-    fichiers.forEach(fichier => create_document(fichier, ""))
-    element(dossiers.length + fichiers.length)
-
-    /* === Attente du clic === */
-    const choix = await click_attente()
-
-    /* === Traitement du clic === */
-    if (choix.type === "dossier") {
-        const nouvel_emplacement = dossier_emplacement === "" ? choix.nom : dossier_emplacement + "/" + choix.nom
-        lancer(nouvel_emplacement)
-    }
-    else if (choix.type === "fichier") {
-        const chemin = dossier_emplacement === "" ? choix.nom : dossier_emplacement + "/" + choix.nom
-        await charger_fichier(chemin)
-        /* Attendre un clic pour revenir à l'explorateur */
-        await click_attente_retour()
-        cacher_texte()
-        lancer(dossier_emplacement)
-    }
+/* Autres */
+const id = localStorage.getItem("id_connecte")
+if (id === null) {
+    window.location = "terminal.html"
 }
-
-/* === Initialisation === */
+identifiant(id)
+/////////////////////////////
 setInterval(horloge, 1000)
-let dossier = ""
-lancer(dossier)
+/////////////////////////////
+element(0)
+
+/* Principal */
+const acces_document = []
+fetch("https://raw.githubusercontent.com/kishinight-production/explorateur-nexuria/main/index.json")
+    .then(convertir => { return convertir.json() })
+    .then(fichiers => {fichiers.forEach(
+        fichier => {if (verifier_fichier(fichier) == true) {
+            acces_document.push(fichier)
+        }}
+    )})
+    .then(
+        creer_explorateur("", acces_document)
+    )
