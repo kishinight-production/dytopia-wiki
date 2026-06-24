@@ -35,9 +35,9 @@ function convertion_MD_in_HTML(texte) {
         .replace(/^# (.+)$/gm, "<h1>$1</h1>")
 
         // Gras et italique
-        .replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>")
-        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-        .replace(/\*(.+?)\*/g, "<em>$1</em>")
+        .replace(/\*\*\*(.+?)\*\*\*/g, "<b><i>$1</i></b>")
+        .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
+        .replace(/\*(.+?)\*/g, "<i>$1</i>")
 
         // Barré
         .replace(/~~(.+?)~~/g, "<s>$1</s>")
@@ -91,8 +91,11 @@ function extraire_yaml(fichier) {
 }
 
 function verifier_fichier(fichier) {
-    const tags_acces =
-        JSON.parse(localStorage.getItem("tag_connecte"));
+    const tags_brut = localStorage.getItem("tag_connecte");
+
+    const tags_acces = tags_brut
+        ? JSON.parse(tags_brut)
+        : [];
 
     const yaml = extraire_yaml(fichier);
 
@@ -156,11 +159,14 @@ function creer_explorateur(dossier, vue_fichier) {
     vue_fichier.forEach(chemin => {
         const relatif = chemin.replace(dossier, "");
         const morceaux = relatif.split("/");
+        const nbr_element = 0;
         if (morceaux.length > 1) {
             const nom_dossier = morceaux[0];
             if (!dossiers_affiches.includes(nom_dossier)) {
                 dossiers_affiches.push(nom_dossier);
                 create_fichier("", nom_dossier);
+                nbr_element += 1
+                element(nbr_element)
             }
 
         }
@@ -178,7 +184,7 @@ function creer_explorateur(dossier, vue_fichier) {
         });
     });
 
-        document.querySelectorAll(".fichier").forEach(element => {
+    document.querySelectorAll(".fichier").forEach(element => {
         element.addEventListener("click", () => {
             fetch(element.dataset.chemin)
                 .then(reponse => reponse.text())
@@ -199,20 +205,20 @@ if (id === null) {
     window.location = "terminal.html"
 }
 identifiant(id)
+
 /////////////////////////////
+
 setInterval(horloge, 1000)
-/////////////////////////////
-element(0)
 
 /* Principal */
 const acces_document = []
 fetch("https://raw.githubusercontent.com/kishinight-production/explorateur-nexuria/main/index.json")
     .then(convertir => { return convertir.json() })
-    .then(fichiers => {fichiers.forEach(
-        fichier => {if (verifier_fichier(fichier) == true) {
+    .then(fichiers.forEach(fichier => {
+        if (verifier_fichier(fichier) == true) {
             acces_document.push(fichier)
-        }}
-    )})
-    .then(
+        }
+    }))
+    .then( () =>
         creer_explorateur("", acces_document)
     )
