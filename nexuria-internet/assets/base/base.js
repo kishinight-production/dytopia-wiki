@@ -214,7 +214,7 @@ setInterval(horloge, 1000)
 const acces_document = []
 fetch("https://raw.githubusercontent.com/kishinight-production/explorateur-nexuria/main/index.json")
     .then(convertir => { return convertir.json() })
-    .then(fichiers.forEach(fichier => {
+    .then(fichiers => fichiers.forEach(fichier => {
         if (verifier_fichier(fichier) == true) {
             acces_document.push(fichier)
         }
