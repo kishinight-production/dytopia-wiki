@@ -31,6 +31,8 @@ function element(n) {
 /* Utilitaires */
 function convertion_MD_in_HTML(texte) {
     return texte
+        .replace(/^---\n([\s\S]*?)\n---/, "")
+
         .replace(/^### (.+)$/gm, "<h3>$1</h3>")
         .replace(/^## (.+)$/gm, "<h2>$1</h2>")
         .replace(/^# (.+)$/gm, "<h1>$1</h1>")
@@ -96,11 +98,11 @@ function verifier_fichier(contenu_fichier) {
 
     const yaml = extraire_yaml(contenu_fichier);
 
-    if (!yaml.tag) {
+    if (!yaml.tags) {
         return true;
     }
 
-    return tags_acces.includes(yaml.tag);
+    return tags_acces.includes(yaml.tags);
 }
 
 /* Document */
@@ -117,8 +119,20 @@ function afficher_document(texte) {
     const explorateur = document.getElementById("base");
     const afficheur = document.getElementById("page-document");
 
+    const yaml = extraire_yaml(texte)
+
+    const texte_f = convertion_MD_in_HTML(texte)
+
+    const titre = yaml.title || "Sans titre";
+    const tag = yaml.tags || "Public";
+
     explorateur.style.display = "none";
-    afficheur.innerHTML = texte;
+    afficheur.innerHTML = `
+        <h1>${titre}</h1>
+        <p><strong>Accès :</strong> ${tag}</p>
+        <hr>
+        ${texte_f}
+    `;
     afficheur.style.display = "block";
 }
 
@@ -220,9 +234,13 @@ function creer_explorateur(dossier, vue_fichier) {
                 .then(reponse => reponse.text())
                 .then(contenu => {
 
-                    afficher_document(
-                        convertion_MD_in_HTML(contenu)
-                    );
+                    afficher_document(contenu);
+
+                    const button = document.getElementById("retour")
+                    button.onclick = () => {
+                        cacher_document();
+                        creer_explorateur(dossier, vue_fichier);
+                    };
 
                 });
 
