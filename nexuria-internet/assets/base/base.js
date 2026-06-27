@@ -138,28 +138,33 @@ function afficher_document(texte) {
 
 /* Fichiers */
 
-function create_fichier(fichier, dossier, chemin = "") {
+function create_fichier(fichier, dossier, chemin = "", date = "") {
     const emplacement = document.getElementById("base");
 
     if (fichier !== "") {
-        const p = document.createElement("p");
+        const div = document.createElement("div");
 
-        p.textContent = `📄 ${fichier}`;
-        p.className = "fichier";
-        p.dataset.nom = fichier;
-        p.dataset.chemin = chemin;
+        div.innerHTML = `
+            <p>📄 ${fichier}</p>
+            <p>${date}</p>
+        `;
 
-        emplacement.appendChild(p);
+        div.className = "fichier";
+        div.dataset.nom = fichier;
+        div.dataset.chemin = chemin;
+
+        emplacement.appendChild(div);
     }
 
     if (dossier !== "") {
-        const p = document.createElement("p");
+        const div = document.createElement("div");
 
-        p.textContent = `📁 ${dossier}`;
-        p.className = "dossier";
-        p.dataset.nom = dossier;
+        div.innerHTML = `📁 ${dossier}`;
 
-        emplacement.appendChild(p);
+        div.className = "dossier";
+        div.dataset.nom = dossier;
+
+        emplacement.appendChild(div);
     }
 }
 
@@ -177,7 +182,9 @@ function creer_explorateur(dossier, vue_fichier) {
     const dossiers_affiches = [];
     let nbr_element = 0;
 
-    vue_fichier.forEach(chemin => {
+    vue_fichier.forEach(fichier => {
+
+        const chemin = fichier.chemin;
 
         if (!chemin.startsWith(dossier)) {
             return;
@@ -204,7 +211,8 @@ function creer_explorateur(dossier, vue_fichier) {
             create_fichier(
                 morceaux[0],
                 "",
-                `https://raw.githubusercontent.com/kishinight-production/explorateur-nexuria/main/${chemin}`
+                `https://raw.githubusercontent.com/kishinight-production/explorateur-nexuria/main/${chemin}`,
+                fichier.date
             );
 
             nbr_element++;
@@ -215,20 +223,20 @@ function creer_explorateur(dossier, vue_fichier) {
 
     document.querySelectorAll(".dossier").forEach(element_html => {
 
-        element_html.addEventListener("click", () => {
+        element_html.onclick = () => {
 
             creer_explorateur(
                 `${dossier}${element_html.dataset.nom}/`,
                 vue_fichier
             );
 
-        });
+        };
 
     });
 
     document.querySelectorAll(".fichier").forEach(element_html => {
 
-        element_html.addEventListener("click", () => {
+        element_html.onclick = () => {
 
             fetch(element_html.dataset.chemin)
                 .then(reponse => reponse.text())
@@ -236,15 +244,14 @@ function creer_explorateur(dossier, vue_fichier) {
 
                     afficher_document(contenu);
 
-                    const button = document.getElementById("retour")
-                    button.onclick = () => {
+                    document.getElementById("retour").onclick = () => {
                         cacher_document();
                         creer_explorateur(dossier, vue_fichier);
                     };
 
                 });
 
-        });
+        };
 
     });
 }
@@ -280,8 +287,17 @@ fetch("https://raw.githubusercontent.com/kishinight-production/explorateur-nexur
                 `https://raw.githubusercontent.com/kishinight-production/explorateur-nexuria/main/${chemin}`
             ).then(r => r.text());
 
-            if (verifier_fichier(contenu)) {
-                acces_document.push(chemin);
+            const yaml = extraire_yaml(contenu);
+
+            if (id === "perm+" || verifier_fichier(contenu)) {
+
+                acces_document.push({
+                    chemin,
+                    date: yaml.date || "",
+                    titre: yaml.title || "",
+                    tags: yaml.tags || ""
+                });
+
             }
         }
 

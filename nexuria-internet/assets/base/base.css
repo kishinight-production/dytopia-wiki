@@ -1,13 +1,14 @@
+/* === Variables === */
 :root {
     --fond-principal: #101010;
     --fond-secondaire: #151515;
     --texte: white;
 }
 
+/* === Balises générales === */
 body {
     margin: 0;
-    height: 100%;
-    min-height: 100vh;
+    background-color: var(--fond-principal);
     color: var(--texte);
 }
 
@@ -23,22 +24,9 @@ header {
 
 main {
     background-color: var(--fond-principal);
-    padding: 1.5%
-}
-
-main p {
-    width: 50%;
-    margin-block: 0.25%;
-    padding: 0.5%;
-    font-size: small;
-}
-
-main p:hover {
-    border: 0.05rem solid var(--texte);
-    cursor: pointer;
-}
-main p:active {
-    background-color: rgba(255,255,255, 0.5);
+    padding: 1.5%;
+    height: calc(100% - 2%);
+    min-height: 80vh;
 }
 
 footer {
@@ -49,4 +37,61 @@ footer {
     gap: 35%;
     font-family: 'Courier New', Courier, monospace;
     font-weight: bold;
+}
+
+/* === Fichiers et dossiers === */
+main #base div {
+    width: 50%;
+    margin-block: 0.25%;
+    padding: 0.5%;
+    font-size: small;
+}
+
+main #base div:hover {
+    border: 0.05rem solid var(--texte);
+    cursor: pointer;
+}
+
+main #base div:active {
+    background-color: rgba(255,255,255, 0.5);
+}
+
+/* === Classe === */
+.fichier {
+    display: flex;
+}
+
+/* === Contenu === */
+#page-document h1 {
+    text-align: center;
+    color: #FFF;
+    text-decoration: underline;
+}
+
+#page-document h2,h3 {
+    color:#FFF;
+    text-decoration: underline;
+}
+
+#page-document p {
+    color: #AAA;
+}
+
+#page-document hr {
+    margin-block: 5%;
+    border-style: solid;
+    font-size: 0.05rem;
+    color: #FFF
+}
+
+#page-document b {
+    color: #55A;
+}
+
+#pages-document blockquote {
+    background-color: var(--fond-secondaire);
+    border-left: 0.05rem solid #FFF;
+    padding-left: 3%;
+    padding-block: 1%;
+    margin-inline: 0;
 }
