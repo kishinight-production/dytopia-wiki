@@ -1,0 +1,148 @@
+/* === Variables === */
+:root {
+    /* Apparence */
+    --fond-terminal: black;
+    --fond-block: #222;
+    /* Texte */
+    --texte-color: white;
+    --texte-correct: green;
+    --texte-erreur: red;
+}
+
+/* === Balises général === */
+body {
+    /* Apparence */
+    font-family: 'Courier New', Courier, monospace;
+
+    /* Couleur */
+    background-color: var(--fond-terminal);
+    color: var(--texte-color);
+
+    /* Taille */
+    margin: 0;
+    height: 100vh;
+
+    /* Comportement */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* === Classes === */
+.correct {
+    /* Apparence */
+    font-style: italic;
+
+    /* Couleur */
+    color: var(--texte-correct);
+}
+
+.erreur {
+    /* Apparence */
+    font-style: italic;
+
+    /* Couleur */
+    color: var(--texte-erreur);
+}
+
+#ligne,#oldligne {
+    /* Comportement */
+    display: flex;
+
+    /* Taille */
+    margin: 0;
+    padding: 0;
+    min-width: 100vh;
+    padding-left: 0.5%;
+}
+
+#input {
+    /* Apparence */
+    font-family: 'Courier New', Courier, monospace;
+    caret-shape: underscore;
+    outline: none;
+    border: none;
+
+    /* Couleur */
+    background-color: transparent;
+    color: var(--texte-color);
+    
+    /* Taille */
+    min-width: auto;
+}
+
+#fenetre {
+    /* Comportement */
+    position: absolute;
+    overflow: auto;
+
+    /* Position */
+    top: 10%;
+    left: 10%;
+
+    /* Taille */
+    width: 60vw;
+    height: 60vh;
+    min-width: 30vw;
+    min-height: 20vh;
+    max-width: 90vw;
+    max-height: 90vh;
+    padding: 1%;
+
+    /* Couleur */
+    opacity: 0.8;
+    background-color: var(--fond-block);
+    color: var(--texte-color);
+}
+
+#header {
+    /* Comportement */
+    display: grid;
+
+    /* Apparence */
+    text-align: center;
+    font-weight: 1000;
+
+    /* Couleur */
+    background-color: var(--fond-block);
+
+    /* Taille */
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    padding: 0.75%;
+    margin: 0;
+    margin-bottom: 1%;
+}
+
+#main {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+#footer {
+    /* Comportement */
+    display: grid;
+
+    /* Apparence */
+    text-align: center;
+    font-weight: 1000;
+
+    /* Couleur */
+    background-color: var(--fond-block);
+    
+    /* Taille */
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    padding: 0.75%;
+    margin: 0;
+    margin-top: auto;
+}
+
+#footer p:last-child,
+#header p:last-child {
+    text-align: right;
+}
+
+#footer p:first-child,
+#header p:first-child {
+    text-align: left;
+}

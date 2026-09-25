@@ -1,0 +1,31 @@
+[
+    {
+        "id": "visiteur",
+        "nom": "Inconnu",
+        "code": "12345", 
+        "tag": 
+        [
+
+        ]
+    },
+
+    {
+        "id": "nexus_marvik",
+        "nom": "mon seigneur",
+        "code": "nExUrI@/@ccès/@dmIn30-10-0001", 
+        "tag": 
+        [
+            "perm+"
+        ]
+    },
+
+    {
+        "id": "sifrene", 
+        "nom": "Sifrène MARVIK",
+        "code": "null", 
+        "tag":
+        [
+            "perm+"
+        ]
+    }
+]
