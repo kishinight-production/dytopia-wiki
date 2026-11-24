@@ -43,7 +43,8 @@ async function TrierDocument() {
     const tags = JSON.parse(localStorage.getItem("tag") || "[]")
 
     for (const chemin of contenu) {
-        await WriteTerminal(`Téléchargement et chargement du contenu du fichier n°${nombre + 1}...`)
+        nombre += 1
+        await WriteTerminal(`Téléchargement et chargement du contenu du fichier n°${nombre}...`)
         try {
             const reponse = await fetch(
                 `https://raw.githubusercontent.com/kishinight-production/explorateur-nexuria/main/${chemin}`
@@ -63,6 +64,7 @@ async function TrierDocument() {
                         tag: yamls.tag,
                         contenu: fichier
                     })
+                    await WriteTerminal(`Fichier n°${nombre} accordé.`, "correct")
                 } else if (tags.length > 0) {
                     for (const tag of tags) { if (tag === "perm+" || tag === yamls.tag) {
                         chemins.push({
@@ -72,15 +74,14 @@ async function TrierDocument() {
                             tag: yamls.tag,
                             contenu: fichier
                         })
-                        await WriteTerminal(`Fichier n°${nombre + 1} accordé.`, "correct")
+                        await WriteTerminal(`Fichier n°${nombre} accordé.`, "correct")
                         break
                     }}
-                } else { await WriteTerminal(`Fichier n°${nombre + 1} non accordé.`, "erreur") }
+                } else { await WriteTerminal(`Fichier n°${nombre} non accordé.`, "erreur") }
         }}
         catch(error) {
             await WriteTerminal(`Erreur d'un chargement d'un fichier.`, "erreur")
             await WriteTerminal(error, "erreur")
-            nombre += 1
         }
     }
 

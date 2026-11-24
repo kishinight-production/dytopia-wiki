@@ -40,12 +40,25 @@ async function boucle() {
                 // Récupération du contenu
                 const contenu = ReturnObject(parametre[0], "contenu")
 
-                await run(contenu)
+                const contenu_f = await HtmlContenu(contenu)
+                const page = document.getElementById("fenetre")
+
+                await run(contenu_f, page)
             } else {
                 WriteTerminal("Le chemin n'existe pas.", "erreur")
             }
         } else if (commande === "list") {
-            await list()
+            const liste_fichier = JSON.parse(localStorage.getItem("chemins"))
+
+            await enumerate(liste_fichier, "Documents disponibles:")
+        } else if (commande == "close") {
+            const page = document.getElementById("fenetre")
+
+            fenetre.style.display = "none"
+        } else if (commande =="help") {
+            const liste_cmds = ["list", "stop", "run"]
+
+            await enumerate(liste_cmds, "Commandes disponibles:")
         } else {
             WriteTerminal("Commande non valide.", "erreur")
         }
